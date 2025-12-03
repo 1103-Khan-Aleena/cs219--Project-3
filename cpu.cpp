@@ -212,24 +212,33 @@ void CPU::run(const vector<Instruction> &program) {
         // Execute instruction
         switch (ins.op) {
             case OpType::ADD: {
+                // Get the first operand from register Rn if valid, else 0
                 uint32_t firstOperand = (ins.Rn >= 0 ? regs[ins.Rn] : 0);
+                // Get the second operand
                 uint32_t secondOperand = getOp2Value(ins);
                 uint32_t result = static_cast<uint32_t>(
                     (static_cast<uint64_t>(firstOperand) + static_cast<uint64_t>(secondOperand)) & 0xFFFFFFFFu);
+                 // Store the result in Rd if valid
                 if (ins.Rd >= 0) regs[ins.Rd] = result;
+                // Update condition flags
                 if (ins.setsFlags) updateFlagsAdd(firstOperand, secondOperand, result);
                 break;
             }
             case OpType::SUB: {
+                // Get the first operand from register Rn if valid, else 0
                 uint32_t firstOperand = (ins.Rn >= 0 ? regs[ins.Rn] : 0);
+                // Get the second operand
                 uint32_t secondOperand = getOp2Value(ins);
                 uint32_t result = static_cast<uint32_t>(
                     (static_cast<uint64_t>(firstOperand) - static_cast<uint64_t>(secondOperand)) & 0xFFFFFFFFu);
+                // Store the result in Rd if valid
                 if (ins.Rd >= 0) regs[ins.Rd] = result;
+                // Update condition flags
                 if (ins.setsFlags) updateFlagsSub(firstOperand, secondOperand, result);
                 break;
             }
             case OpType::AND: {
+                // Bitwise AND between operands
                 uint32_t firstOperand = (ins.Rn >= 0 ? regs[ins.Rn] : 0);
                 uint32_t secondOperand = getOp2Value(ins);
                 uint32_t result = firstOperand & secondOperand;
@@ -296,6 +305,7 @@ void CPU::run(const vector<Instruction> &program) {
                 break;
             }
             case OpType::STR: {
+                // Store word from Rd into memory
                 uint32_t address = (ins.Rn >= 0 ? regs[ins.Rn] : 0);
                 int memoryIndex = -1;
                 if (inMemRange(address, memoryIndex)) {
@@ -304,6 +314,7 @@ void CPU::run(const vector<Instruction> &program) {
                 break;
             }
             case OpType::CMP: {
+                  // Compare Rn with operand
                 uint32_t firstOperand = (ins.Rn >= 0 ? regs[ins.Rn] : 0);
                 uint32_t secondOperand = getOp2Value(ins);
                 uint32_t result = static_cast<uint32_t>(
@@ -312,17 +323,20 @@ void CPU::run(const vector<Instruction> &program) {
                 break;
             }
             case OpType::BEQ: {
+                // Branch if equal (zero flag set)
                 bool isZeroFlagSet = nzcv.Z;
                 if (isZeroFlagSet == true) {
                     if (ins.branchTarget >= 0) {
                         programCounter = ins.branchTarget;
                         printState(ins);
-                        continue;
+                        continue;//skip the rest of the instructions in loop
                     }
                 }
                 break;
             }
-            default: break;
+            default:
+                //this shoulddd take care of unsupported or unimplemented instructions
+                break;
         }
 
         printState(ins);
