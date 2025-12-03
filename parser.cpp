@@ -5,10 +5,7 @@
 #include <string>
 #include <sstream>
 #include <cctype>
-
 using namespace std;
-
-
 //remove leading and trailing whitespace
 string trimString(const string &input) {
     size_t startIndex = input.find_first_not_of(" \t");
@@ -20,7 +17,6 @@ string trimString(const string &input) {
 
 //parse a register string like R0 or [R1]
 //returns -1 if invalid
-
 int parseRegister(const string &operand) {
     string operandCopy = operand;
 
@@ -38,7 +34,6 @@ int parseRegister(const string &operand) {
     }
     return -1;
 }
-
 
 //parse operand 2 (immediate or register)
 Op2 parseOperand2(const string &operandStr) {
@@ -59,7 +54,7 @@ Op2 parseOperand2(const string &operandStr) {
         return operand;
     }
 
-    // Otherwise, treat as register
+    // treat as register
     int regNumber = parseRegister(operandStr);
     if (regNumber >= 0) {
         operand.isImmediate = false;
