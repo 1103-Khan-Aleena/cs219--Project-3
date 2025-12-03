@@ -2,9 +2,7 @@
 #include "helpers.h"
 #include <iostream>
 #include <iomanip> //referenced website cplusplus.com "<iomanip>"
-
 using namespace std;
-
 
 // CPU constructor
 CPU::CPU() {
@@ -20,20 +18,16 @@ CPU::CPU() {
     nzcv = Flags{};
 }
 
-
 // Check if address is in memory range
 bool CPU::inMemRange(uint32_t addr, int &index) const {
     if (addr < MEM_BASE) {
         return false;
     }
-
     uint32_t offset = addr - MEM_BASE;
-
     // Only word-aligned addresses allowed
     if (offset % 4 != 0) {
         return false;
     }
-
     index = static_cast<int>(offset / 4);
     return (index >= 0 && index < 5);
 }
@@ -43,19 +37,15 @@ uint32_t CPU::getOp2Value(const Instruction &ins) const {
     if (ins.op2.isImmediate) {
         return ins.op2.imm;
     }
-
     if (ins.op2.reg >= 0 && ins.op2.reg < 12) {
         return regs[ins.op2.reg];
     }
-
     return 0;
 }
-
 
 // Update flags for ADD
 void CPU::updateFlagsAdd(uint32_t A, uint32_t B, uint32_t result) {
     uint64_t sum64 = static_cast<uint64_t>(A) + static_cast<uint64_t>(B);
-
     bool carryFlag = ((sum64 >> 32) & 1);
     bool negativeFlag = (result >> 31) & 1;
     bool zeroFlag = (result == 0);
@@ -66,7 +56,6 @@ void CPU::updateFlagsAdd(uint32_t A, uint32_t B, uint32_t result) {
     nzcv.Z = zeroFlag;
     nzcv.V = overflowFlag;
 }
-
 
 // Update flags for SUB/CMP
 void CPU::updateFlagsSub(uint32_t A, uint32_t B, uint32_t result) {
@@ -81,7 +70,6 @@ void CPU::updateFlagsSub(uint32_t A, uint32_t B, uint32_t result) {
     nzcv.V = overflowFlag;
 }
 
-
 // Update flags for logical operations
 void CPU::updateFlagsLogical(uint32_t result) {
     bool negativeFlag = (result >> 31) & 1;
@@ -93,7 +81,6 @@ void CPU::updateFlagsLogical(uint32_t result) {
 
 }
 
-
 // Check if the condition of instruction holds
 bool CPU::condHolds(const string &cond) const {
     bool isZeroFlagSet = nzcv.Z;
@@ -102,45 +89,36 @@ bool CPU::condHolds(const string &cond) const {
     bool isOverflowFlagSet = nzcv.V;
 
     if (cond.empty()) return true;
-
     if (cond == "EQ") {
         if (isZeroFlagSet == true) return true;
         else return false;
     }
-
     if (cond == "NE") {
         if (isZeroFlagSet == false) return true;
         else return false;
     }
-
     if (cond == "GT") {
         if ((isZeroFlagSet == false) && (isNegativeFlagSet == isOverflowFlagSet)) return true;
         else return false;
     }
-
     if (cond == "GE") {
         if (isNegativeFlagSet == isOverflowFlagSet) return true;
         else return false;
     }
-
     if (cond == "LT") {
         if (isNegativeFlagSet != isOverflowFlagSet) return true;
         else return false;
     }
-
     if (cond == "LE") {
         if ((isZeroFlagSet == true) || (isNegativeFlagSet != isOverflowFlagSet)) return true;
         else return false;
     }
-
     return false;
 }
-
 
 // Print the current CPU state
 void CPU::printState(const Instruction &ins) const {
     cout << ins.raw << "\n";
-
     // Print registers
     cout << "Register array:\n";
     for (int i = 0; i < 12; i++) {
@@ -155,7 +133,6 @@ void CPU::printState(const Instruction &ins) const {
          << (nzcv.Z ? '1' : '0')
          << (nzcv.C ? '1' : '0')
          << (nzcv.V ? '1' : '0') << "\n";
-
     // Print memory
     cout << "Memory array:\n";
     for (int i = 0; i < 5; i++) {
@@ -165,23 +142,17 @@ void CPU::printState(const Instruction &ins) const {
     }
     cout << "\n";
 }
-
-
 // Decode an opcode into base, condition, and setsS
-
 void decodeOpcode(const string &opcode_in, string &base, string &cond, bool &setsS) {
     string opcode = opcode_in;
     base.clear();
     cond.clear();
     setsS = false;
-
     if (opcode.empty()) return;
-
     if (opcode.back() == 'S') {
         setsS = true;
         opcode.pop_back();
     }
-
     const string conds[] = {"EQ", "NE", "GT", "GE", "LT", "LE"};
 
     for (const string &c : conds) {
@@ -192,10 +163,8 @@ void decodeOpcode(const string &opcode_in, string &base, string &cond, bool &set
             return;
         }
     }
-
     base = opcode;
 }
-
 // Convert base string to OpType
 OpType opFromBase(const string &base) {
     if (base == "ADD") return OpType::ADD;
@@ -215,18 +184,14 @@ OpType opFromBase(const string &base) {
 
     return OpType::INVALID;
 }
-
-
 // Run a program (list of instructions)
 
 void CPU::run(const vector<Instruction> &program) {
-
     int programCounter = 0;
     int programSize = static_cast<int>(program.size());
 
     while (programCounter < programSize) {
         const Instruction &ins = program[programCounter];
-
         // Handle label-only instruction
         if (ins.op == OpType::INVALID && ins.hasLabel) {
             Instruction tmp = ins;
